@@ -10,7 +10,8 @@ def euclidean(x1, y1, x2, y2):
 
     return float(distance_points)
 
-
+# The below functions should be a single function with a k parameter to decide how many neighbours 
+# the comparsion should use.
 def classifier_nearst_point(nearest_points):
     # Check what class the nearest point hasa 0 = "Pich" or 1 = "Pikachu"
     if nearest_points[0][1] == 0:
@@ -33,6 +34,7 @@ def classifier_ten_nearst_point(nearest_points):
         return f"Pikachu med {count_pikachu} röster"    
 
 
+
 def nearst_point(testpoint, traindata):
     # Gives a list on the ten closests training points to test point
     nearst_points =[(euclidean(testpoint[0], testpoint[1], train_point[0], train_point[1]), train_point[2]) for train_point in traindata]
@@ -40,7 +42,7 @@ def nearst_point(testpoint, traindata):
     nearst_points.sort()
     return nearst_points[:10]   
        
-
+# Using datapoints_0 and _1 here is risky! If this function is called in the wrong place in the script, it will crash!
 def rnd_data():
     # Creats random test and train data lists
     rnd_traindata = rnd.sample(datapoints_0, 50)
@@ -64,6 +66,8 @@ def calculate_accuracy():
 
     return accuracy
 
+# Reading globals like datapoints_1 and _0 here is risky! Functions defined earlier use them, so all calls 
+# to rnd_data must happen _after_ this open block!
 
 with open("Labs/Data/datapoints.txt", "r") as data_read:
     # Creat a list of data points from file
