@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 from load_data import StockDataAPI, StockDataLocal
 import plotly_express as px
+from dateutil import relativedelta
 
 # module variables
 
@@ -27,6 +28,12 @@ ohlc_options = [{"label": option, "value": option}
 
 # creates a Dash App
 app = dash.Dash(__name__)
+ohlc_options = [{"label": option.capitalize(), "value": option} 
+                for option in ["open", "high", "low", "close"]]
+
+sliders_marks = {i: mark for i, mark in enumerate}
+
+
 
 app.layout = html.Div([
     html.H1("Stocks viewer"),
@@ -36,7 +43,17 @@ app.layout = html.Div([
                  value='AAPL',
                  placeholder='Apple'
                  ),
+    dcc.RadioItems(id="ohlc-radio", className="", 
+                   options=ohlc_options, 
+                   value= "close"),
+    
     dcc.Graph(id="stock-graph"),
+    dcc.Slider(id="time-slider",
+               min= 0,
+               max= 5,
+               step=None,
+               value= 2,
+               marks= sliders_marks)
 ])
 
 # when something changes in the input component, the code in function below will run and update the output component
@@ -44,19 +61,29 @@ app.layout = html.Div([
 @app.callback(
     Output("stock-graph", "figure"),
     Input("stock-picker-dropdown", "value"),
+    Input("ohlc-radio", "value"),
+    Input("time-slider", "value")
 )
-def update_graph(stock, time_index="daily"):
+def update_graph(stock, ohlc, time_index=1):
     # slow due to limited amount of API calls on free subscription
     # df = stock_data.get_stock(stock)
     # fig = px.line(df, x=df.index, y="Close",
     #               labels={"index": "Date"}, title=stock)
    
     df_daily, df_intradaily = df_dict[stock]
-    df = df_daily if time_index == "daily" else df_intradaily 
-    # vilken conditinal som helst kan skrivas på detta sätte, men måste ge ett värde, måste ha en else statas
+    df = df_intradaily if time_index < 2 else df_daily # vilken conditinal som helst kan skrivas på detta sätte, men måste ge ett värde, måste ha en else statas
     
-    fig = px.line(df, x=df.index, y="close", title=stock[stock_dict])
+    fig = px.line(df, x=df.index, y=ohlc , title=stock[stock_dict])
+    days = {i: day for i, day in enumerate([1, 7, 90, 365, 365*5])}
+    df = df if time_index == 5 else filter_time(df, days=days[time_index])
     return fig
+
+def filter_time (df, days=0):
+    last_day = df.index[0].date()
+    start_day = last_day-realtivedelta(days=days)
+    df = df.sort_index().loc[start_day:last_day]
+
+    return df
 
 # TODO: download local csv-files to work with in order to not overload the free API
 

@@ -40,3 +40,8 @@ def convert_object_to_numbers(dataframe, decimal_point=True):
     else:
     # if condn. is False then it will do nothing.
         return
+    
+def remove_footnote_symbals (dataframe):
+    dataframe[i] = dataframe[i].str.replace(r"\[\d+\]", "", regex=True)
+
+    return dataframe
