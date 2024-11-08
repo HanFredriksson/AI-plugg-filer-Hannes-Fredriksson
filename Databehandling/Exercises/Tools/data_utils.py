@@ -9,18 +9,34 @@ def plot_missing_values(data):
     return fig.show()
 
 
-def whitespace_remover(dataframe):
+def convert_object_to_numbers(dataframe, decimal_point=True):
+    
+    import pandas as pd
+   
+    skipped_col = []
 
-    # iterating over the columns
     for i in dataframe.columns:
 
         # checking datatype of each columns
         if dataframe[i].dtype == 'object':
+            
+            # if there is a . sepreating the digits in 100s
+            if decimal_point == False:
+                dataframe[i] = dataframe[i].str.replace(".", "", regex=False)
 
-            # applying replace function on column and removes all whitespaces
-            dataframe[i] = dataframe[i].str.replace(" ", "")
-        
-        else:
+            # removes all whitespaces, commas to punctuation and convert to numeric
+            dataframe[i] = dataframe[i].str.replace(r"\s+", "", regex=True)
+            dataframe[i] = dataframe[i].str.replace(",", ".")
+            
+            try:
+                dataframe[i] = pd.to_numeric(dataframe[i])
+            except ValueError:
+                skipped_col.append(i)
+                continue
 
-            # if condn. is False then it will do nothing.
-            pass
+    # gives you the namne of the skipped column
+    if skipped_col:
+            return f"Columns \"{', '.join(skipped_col)}\" were skipped"
+    else:
+    # if condn. is False then it will do nothing.
+        return
