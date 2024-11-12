@@ -18,11 +18,12 @@ def convert_object_to_numbers(dataframe, decimal_point=True):
     for i in dataframe.columns:
 
         # checking datatype of each columns
-        if dataframe[i].dtype == 'object':
+        if dataframe[i].dtype == "object":
             
             # if there is a . sepreating the digits in 100s
             if decimal_point == False:
                 dataframe[i] = dataframe[i].str.replace(".", "", regex=False)
+                dataframe[i] = dataframe[i].str.replace(",", "", regex=False)
 
             # removes all whitespaces, commas to punctuation and convert to numeric
             dataframe[i] = dataframe[i].str.replace(r"\s+", "", regex=True)
@@ -42,6 +43,9 @@ def convert_object_to_numbers(dataframe, decimal_point=True):
         return
     
 def remove_footnote_symbals (dataframe):
-    dataframe[i] = dataframe[i].str.replace(r"\[\d+\]", "", regex=True)
+    
+    for i in dataframe.columns:
+        if dataframe[i].dtype == "object":
+            dataframe[i] = dataframe[i].str.replace(r"\[\d+\]", "", regex=True)
 
     return dataframe
