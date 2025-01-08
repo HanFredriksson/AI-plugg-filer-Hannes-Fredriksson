@@ -6,6 +6,10 @@
 		{
 			"name": "Projekt-OS",
 			"path": "../Projekt-OS"
+		},
+		{
+			"name": "Klimat",
+			"path": "../../Klimat"
 		}
 	],
 	"settings": {}
