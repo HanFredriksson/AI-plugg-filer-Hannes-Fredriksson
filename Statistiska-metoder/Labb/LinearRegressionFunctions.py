@@ -1,55 +1,133 @@
 import numpy as np
 import scipy.stats as stats
+"""Tanken här väl att man matar in hela datan """
+
 
 class LinearRegression:
     def __init__(self, data):
         self.data = data
+        self.X = None
+        self.Y = None
+        self.d = None
+        self.n = None
+        self._confi_lvl = None
+        self.coefficients = None
 
     @property
-    # d = number of features/parameters/dimensions of the model
-    # n = size of the sample
+    def param_size(self):
+        return self.d, self.n
 
-    # @property
-    # A property "confidence_level" that stores the selected confidence level.
+    @param_size.setter
+    def set_param_size (self, _):
+        self.d = self.X.shape[1] - 1
+        self.n = self.Y.shape[0]
+
+
+    @property
+    def varibals_X_Y(self):
+        return self.X, self.Y
     
-    def OLS ():
-        # Ordinary Least Squares
-        # beta = (X^T * X)^−1 X^T Y
-        pass
+    @varibals_X_Y.setter
+    def varibals_X_Y(self, param, sample):
+        self.Y = self.data[sample].to_numpy()
+        X = self.data[param].to_numpy()
 
-    def r_value():
-        # Pearson correlation number (r)
-        # r = Cov(Xa,Xb) √VarX_a VarX_b
-        pass
+        self.X = np.column_stack([np.ones(self.Y.shape[0]),X])
 
-    def sigma2 ():
+
+    @property
+    # A property "confidence_level" that stores the selected confidence level.
+
+    def confi_lvl(self):
+        return self.confi_lvl
+    
+    @confi_lvl.setter
+    def confi_lvl(self, lvl):
+        if 0 < lvl < 1:
+            self._confi_lvl = lvl
+        else:
+            raise ValueError("Confidence level must be between 0 and 1.")
+
+    def fit (self):
+        """Fit the linear regression model with Ordinary Least Squares method
+        Formula: b = (X^T*X)^-1 * X^T * Y
+        """
+
+        self.param_size = None
+
+        self.coefficients = np.linalg.pinv(self.X.T @ self.X) @ self.X.T @ self.Y 
+
+    def RSS (self):
+        """Sum of squared residuals, RSS or SSE
+        """
+
+        RSS = np.sum(np.square(self.Y - (self.X @ self.coefficients)))
+
+        return RSS
+    
+    def variance (self):
         # Variance, sigma2 
         # σ2 = SSE / n −d −1
         # SSE - Sum of Square Errors
         # SSE = n∑i=1 (Yi −Xb)2
-        pass
+        
+        var = self.RSS() / (self.n - self.d - 1)
+
+        return var
     
-    def sigma():
+    def sigma (self):
         # Standard deviation, sigma
         # S = √var
-        pass
+        
+        S = np.sqrt(self.variance)
 
-    def significans():
-        # Test the significans of the regression of all paramters
-        # SSR/d/σ2
-        # Syy = n∑i=1 (Y −μy)^2 = n∑n i=1 (Y^2) − (∑n i=1 Y )^2 / n
-        #SSR = SSE −Syy
+        return S
+    
+    def Syy (self):
+        """A is a measure of the variability in y.
+        Formula: Syy = n∑i=1 (y_i - y_mean)^2"""
 
+        Syy = np.sum((np.square(self.Y)) - (np.square(np.sum(self.Y))/self.n))
+
+        return Syy
+    
+    def SSR (self):
+        """The sum of squares due to regression
+        SSR = SSE - Syy
+        """
+        SSR = self.RSS() - self.Syy()
+
+        return SSR
+
+    def significans (self):
+        """Test the significans of the regression of all paramters
+        SSR/d/σ^2 put through the F-distribution.
+        """
         # Test the significans of the regression of one paramters
         #hat{βi} / hat{σ} √cii
+
+        F_statistic = (self.SSR/self.d)/self.sigma
+        p_value = stats.f.sf(F_statistic, self.d, self.n-self.d-1)
+
+        for param in params:
+            param_statistic =
+            p_value_param = 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))    
+        # gör en dict som retur
+        return p_value
+
+       
+
+    def r_value (self):
+        # Pearson correlation number (r)
+        # r = Cov(Xa,Xb) √VarX_a VarX_b
         pass
 
-    def R2 ():
+    def R2 (self):
         # coefficient of multiple determination
         # R^2 = SSR / Syy
         pass
 
-    def ConfidenceIntervalPredictor():
+    def ConfidenceIntervalPredictor(self):
         # ˆβi ± t_α/2 \hatσ^2 √cii
         # where tα/2 is the appropriate point based on the Tn−d−1 distribution and a confidence level α.
         pass
