@@ -12,5 +12,7 @@
 			"path": "../../Klimat"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"git.autofetch": true
+	}
 }
