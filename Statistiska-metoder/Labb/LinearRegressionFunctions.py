@@ -17,6 +17,12 @@ Testing, do check with testing adv data with this class.
 Overkill, try to make it so you can make predictions, if there is time for it.
 So a function you can give X values to run againt the regression. See if you can make it
 so it also gives the probality and the error for the predicted variable 
+
+
+To do
+----------------
+
+gå genom vad som behövs för VG
 """
 
 
@@ -28,7 +34,7 @@ class LinearRegression:
         self.Y = None
         self.d = None
         self.n = None
-        self._confi_lvl = None
+        self._confi_lvl = 0.975
         self.coefficients = None
 
     # @property
@@ -56,8 +62,8 @@ class LinearRegression:
 
         Sets the size of sampels to varibal n 
         """
-        self.Y = self.data[sample].to_numpy()
-
+        self.Y= self.data[sample]
+        self.Y = np.column_stack([self.Y])
         self.n = len(self.Y)
 
     @property
@@ -105,11 +111,10 @@ class LinearRegression:
         Fit the linear regression model with Ordinary Least Squares method
         Sets it to varibal coefficients
         """
-
-        self.param_size = None
-
+        
         self.coefficients = np.linalg.pinv(self.X.T @ self.X) @ self.X.T @ self.Y 
-
+        
+        return 
 
     def RSS (self):
         """
@@ -126,7 +131,7 @@ class LinearRegression:
         Variance of the dependent  variable Y
         """
         
-        Syy = np.sum(np.square(self.Y)) - (np.square(np.sum(self.Y)))/self.n
+        Syy = np.sum(np.square(self.Y)) - (np.square(np.sum(self.Y))/self.n)
 
         return Syy
     
@@ -142,9 +147,9 @@ class LinearRegression:
 
     def Sxy (self):
         """
-        Covariance between XX and YY
+        Covariance between X and Y, cross-product term
         """
-        Sxy = (np.sum(self.X[:, 1] * self.Y) - (np.sum(self.X[:, 1])*np.sum(self.Y))/self.n)
+        Sxy = np.sum(self.X * self.Y) - (np.sum(self.X) * np.sum(self.Y))/self.n
 
         return Sxy
 
@@ -211,38 +216,52 @@ class LinearRegression:
         return R2
     
 
+    def Significance_individual_variables (self, beta):
+        """
+        arg: int (0 = β0)
 
+        Significance tests on individual variables
+        """
+        
+        param_statistic = self.coefficients[beta] / (self.sigma() * np.sqrt(self.t_statistic()[beta, beta]))
+        p_beta= 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))
+        
+        return p_beta
+    
 
+    def p_value_pairs_param (self):
+        """
+        A function that calculates the Pearson number between all pairs of parameters.
+        Pearson correlation number (r)
+        """
+        p_value_pairs = {"Param":[]}
+        
 
+        for param in self.data.columns:
+            self.params = [param]
+            self.X = np.column_stack([[i[1:] for i in self.X]])
+            p_value_pairs[param] = []
+
+            for sample in self.data.columns:
+                self.sample_size = [sample]
+                rho = self.Sxy() / (np.sqrt(self.Sxx() * self.Syy()))
+                p_value_pairs[param].append(rho)
+
+            p_value_pairs["Param"].append(param)
+            
+
+        return p_value_pairs
+    
     # !!! Inte testa här ifrån !!!
-    def confidence_interval_predictor(self):
+    def confidence_interval_predictor(self, param):
         # ˆβi ± t_α/2 \hatσ^2 √cii
         # where tα/2 is the appropriate point based on the Tn−d−1 distribution and a confidence level α.
 
         df = self.n - self.d - 1 
         t = stats.t.ppf(1 - self._confi_lvl/2, df)
 
-        se_b0 = self.variance() * (1/self.n)+(np.square(self.t-statistic()))
-        ci_b1 = (self.b[0], t*np.sqrt(se_b0))
-
-        return ci_b1
-    
-
-    def p_value_pairs_param (self):
-        # A function or method that calculates the Pearson number between all pairs of parameters.
-        # Pearson correlation number (r)
-        # r = Cov(Xa,Xb) √VarX_a VarX_b
-        
-        rho = self.Sxy / (np.sqrt(self.Sxx*self.Syy))
-
-        return rho
-
-
-
-    def Significance_tests_on_individual_variables (self):
-        # Significance tests on individual variables, in particular categorical variables.
-        
-        param_statistic = self.d / (self.sigma*np.sqrt(self.t-statistic()[3, 3]))
-        p_beta= 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))
-        
-        return p_beta
+        se_b = self.variance() * (1/self.n)+(np.square(self.t_statistic()))
+        confidence = (self.coefficients[param], t*np.sqrt(se_b))
+       
+        return confidence
+        # print(f"Confidence interval on predictor β0: {confidence[0]:.3f} ± {confidence[1]:.3f} interval: [{[0]- confidence[1]:.3f}, {self.coefficients[0]+ confidence[1]:.3f}]")
