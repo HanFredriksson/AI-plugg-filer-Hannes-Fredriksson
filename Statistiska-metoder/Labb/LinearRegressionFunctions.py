@@ -22,6 +22,7 @@ so it also gives the probality and the error for the predicted variable
 
 class LinearRegression:
     def __init__(self, data):
+
         self.data = data
         self.X = None
         self.Y = None
@@ -30,26 +31,56 @@ class LinearRegression:
         self._confi_lvl = None
         self.coefficients = None
 
+    # @property
+    # def param_size(self):
+
+    #     return self.d, self.n
+
+    # @param_size.setter
+    # def set_param_size (self, _):
+    #     self.d = self.X.shape[1] - 1
+    #     self.n = self.Y.shape[0]
+
     @property
-    def param_size(self):
-        return self.d, self.n
+    def sample_size(self):
 
-    @param_size.setter
-    def set_param_size (self, _):
-        self.d = self.X.shape[1] - 1
-        self.n = self.Y.shape[0]
+        return self.Y, self.n
 
 
-    @property
-    def varibals_X_Y(self):
-        return self.X, self.Y
+    @sample_size.setter
+    def sample_size(self, sample):
+        """
+        arg: list
 
-    @varibals_X_Y.setter
-    def varibals_X_Y(self, param, sample):
+        Sets the values for the samples to variabel Y
+
+        Sets the size of sampels to varibal n 
+        """
         self.Y = self.data[sample].to_numpy()
-        X = self.data[param].to_numpy()
 
+        self.n = len(self.Y)
+
+    @property
+    def params(self):
+
+        return self.X, self.d
+
+    @params.setter
+    
+    def params(self, params):
+        """
+        arg: list
+
+        Sets the values for parameters to varibal X
+
+        Sets the number of parameters to varibal d
+        """
+        X = self.data[params].to_numpy()
         self.X = np.column_stack([np.ones(self.Y.shape[0]),X])
+
+        self.d = len(params)
+
+
 
 
     @property
@@ -58,10 +89,10 @@ class LinearRegression:
     def confi_lvl(self):
         return self.confi_lvl
     
-    @confi_lvl.setter
 
+    @confi_lvl.setter
     # !!! Check that this level is correctly passed!!!!
-    # namn  på variabelAlpha 
+    # namn  på variabel Alpha 
     def confi_lvl(self, lvl):
         if 0 < lvl < 1:
             self._confi_lvl = lvl
@@ -70,8 +101,9 @@ class LinearRegression:
 
     
     def fit (self):
-        """Fit the linear regression model with Ordinary Least Squares method
-        Formula: b = (X^T*X)^-1 * X^T * Y
+        """
+        Fit the linear regression model with Ordinary Least Squares method
+        Sets it to varibal coefficients
         """
 
         self.param_size = None
@@ -80,7 +112,8 @@ class LinearRegression:
 
 
     def RSS (self):
-        """Sum of squared residuals, RSS or SSE
+        """
+        Sum of squared residuals, RSS or SSE
         """
 
         RSS = np.sum(np.square(self.Y - (self.X @ self.coefficients)))
@@ -89,67 +122,78 @@ class LinearRegression:
     
 
     def Syy (self):
-        """A is a measure of the variability in y.
-        Formula: Syy = n∑i=1 (y_i - y_mean)^2"""
-
-        Syy = np.sum((np.square(self.Y)) - (np.square(np.sum(self.Y))/self.n))
+        """
+        Variance of the dependent  variable Y
+        """
+        
+        Syy = np.sum(np.square(self.Y)) - (np.square(np.sum(self.Y)))/self.n
 
         return Syy
     
 
     def Sxx (self):
-        Sxx = np.sum((np.square(self.X)) - (np.square(np.sum(self.X))/self.n))
+        """
+        Variance of the independent variable X
+        """
+        Sxx = np.sum(np.square(self.X)) - (np.square(np.sum(self.X))/self.n)
 
         return Sxx
     
 
     def Sxy (self):
+        """
+        Covariance between XX and YY
+        """
         Sxy = (np.sum(self.X[:, 1] * self.Y) - (np.sum(self.X[:, 1])*np.sum(self.Y))/self.n)
 
         return Sxy
 
 
     def SSR (self):
-        """The sum of squares due to regression
-        SSR = SSE - Syy
+        """
+        The sum of squares due to regression
         """
         SSR = self.RSS() - self.Syy()
 
         return SSR
 
 
-    def c (self):
-        c = np.linalg.pinv(self.X.T @ self.X) * self.variance()
-        return c
+    def t_statistic (self):
+        """
+        Gives the t-statistic value
+        """
 
+        t = np.linalg.pinv(self.X.T @ self.X) * self.variance()
 
-    def sigma (self):
-        # Standard deviation, sigma
-        # S = √var
-        
-        S = np.sqrt(self.variance)
-
-        return S
-
+        return t
 
     def variance (self):
-        # Variance, sigma2 
-        # σ2 = SSE / n −d −1
-        # SSE - Sum of Square Errors
-        # SSE = n∑i=1 (Yi −Xb)2
-        
+        """
+        Variance for the sample, sigma2
+        """
+    
         var = self.RSS() / (self.n - self.d - 1)
 
         return var
 
+    def sigma (self):
+        """
+        Residual standard error, Sigma
+        """
+            
+        
+        S = np.sqrt(self.variance())
+
+        return S
+
+
 
     def significans (self):
-        """Test the significans of the regression of all paramters
-        SSR/d/σ^2 put through the F-distribution.
         """
-        # Test the significans of the regression of one paramters
-        #hat{βi} / hat{σ} √cii
-
+        Test the significans of the regression of all paramters
+        put through the F-distribution.
+        """
+       
         F_statistic = (self.SSR()/self.d)/self.sigma()
         p_value = stats.f.sf(F_statistic, self.d, self.n-self.d-1)
        
@@ -159,11 +203,18 @@ class LinearRegression:
        
 
     def R2 (self):
-        # coefficient of multiple determination
+        """
+        Coefficient of multiple determination, R2
+        """
+
         R2 = self.SSR() / self.Syy()
         return R2
     
 
+
+
+
+    # !!! Inte testa här ifrån !!!
     def confidence_interval_predictor(self):
         # ˆβi ± t_α/2 \hatσ^2 √cii
         # where tα/2 is the appropriate point based on the Tn−d−1 distribution and a confidence level α.
@@ -171,7 +222,7 @@ class LinearRegression:
         df = self.n - self.d - 1 
         t = stats.t.ppf(1 - self._confi_lvl/2, df)
 
-        se_b0 = self.variance() * (1/self.n)+(np.square(self.c()))
+        se_b0 = self.variance() * (1/self.n)+(np.square(self.t-statistic()))
         ci_b1 = (self.b[0], t*np.sqrt(se_b0))
 
         return ci_b1
@@ -191,7 +242,7 @@ class LinearRegression:
     def Significance_tests_on_individual_variables (self):
         # Significance tests on individual variables, in particular categorical variables.
         
-        param_statistic = self.d / (self.sigma*np.sqrt(self.c()[3, 3]))
+        param_statistic = self.d / (self.sigma*np.sqrt(self.t-statistic()[3, 3]))
         p_beta= 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))
         
         return p_beta
