@@ -34,7 +34,7 @@ class LinearRegression:
         self.Y = None
         self.d = None
         self.n = None
-        self._confi_lvl = 0.975
+        self._confi_lvl = 0
         self.coefficients = None
 
 
@@ -80,16 +80,20 @@ class LinearRegression:
 
 
     @property
-    # A property "confidence_level" that stores the selected confidence level.
 
-    def confi_lvl(self):
-        return self.confi_lvl
+    def confidence_lvl(self):
+        return self._confi_lvl
     
 
-    @confi_lvl.setter
-    # !!! Check that this level is correctly passed!!!!
-    # namn  på variabel Alpha 
-    def confi_lvl(self, lvl):
+    @confidence_lvl.setter
+    
+    def confidence_lvl(self, lvl):
+        """
+        arg: int - 0 < level < 1.
+
+        Set the confidence level, alpha
+
+        """
         if 0 < lvl < 1:
             self._confi_lvl = lvl
         else:
@@ -128,7 +132,7 @@ class LinearRegression:
         returns: int
         """
         
-        Syy = self.n*np.sum(np.square(self.Y)) - (np.square(np.sum(self.Y)))/self.n
+        Syy = (self.n*np.sum(np.square(self.Y)) - np.square(np.sum(self.Y)))/self.n
 
         return Syy
     
@@ -139,7 +143,10 @@ class LinearRegression:
 
         returns: int
         """
-        Sxx = self.n*np.sum(np.square(self.X)) - (np.square(np.sum(self.X)))/self.n
+     
+        X = np.column_stack([[i[1:] for i in self.X]])
+
+        Sxx = (self.n*np.sum(np.square(X)) - np.square(np.sum(X)))/self.n
 
         return Sxx
     
@@ -150,9 +157,11 @@ class LinearRegression:
 
         returns: int
         """
-        x_2 = np.column_stack([[i[1:] for i in self.X]])
+        
 
-        Sxy = np.sum(x_2 * self.Y) - (np.sum(x_2) * np.sum(self.Y))/self.n
+        X = np.column_stack([[i[1:] for i in self.X]])
+
+        Sxy = np.sum(X * self.Y) - (np.sum(X) * np.sum(self.Y))/self.n
 
         return Sxy
 
@@ -175,7 +184,7 @@ class LinearRegression:
         retruns: array - with variance/covariance matrix
         """
 
-        cii = np.linalg.pinv(self.X.T @ self.X)
+        cii = np.linalg.pinv(self.X.T @ self.X) * self.variance()
 
         return cii
 
@@ -215,7 +224,7 @@ class LinearRegression:
         F_statistic = (self.SSR()/self.d)/self.sigma()
         p_value = stats.f.sf(F_statistic, self.d, self.n-self.d-1)
        
-        # gör en dict som retur
+      
         return p_value
 
        
@@ -245,7 +254,7 @@ class LinearRegression:
         
         return p_beta
     
-# !!! Self.params måste bort. Får anropa Sxy, Sxx, Syy annorlunda.!!!!
+
     def p_value_pairs_param (self):
         """
         A function that calculates the Pearson number between all pairs of parameters.
@@ -254,8 +263,9 @@ class LinearRegression:
         Returns: Dict - With an index key form columns of data frame and keys with 
         columns from dataframe with the Pearson nummber
         """
-        p_value_pairs = {"Param":[]}
-        
+        p_value_pairs = {"Params":[]}
+        original_X = self.X
+        original_d = self.d
 
         for param in self.data.columns:
             self.params = [param]
@@ -266,12 +276,14 @@ class LinearRegression:
                 rho = self.Sxy() / (np.sqrt(self.Sxx() * self.Syy()))
                 p_value_pairs[param].append(rho)
 
-            p_value_pairs["Param"].append(param)
+            p_value_pairs["Params"].append(param)
             
+        self.X = original_X
+        self.d = original_d
 
         return p_value_pairs
     
-    def confidence_interval_predictor(self):
+    def confidence_interval_parameters(self):
         """
         Gives the confdence intervall between all predictors
 
@@ -282,17 +294,17 @@ class LinearRegression:
         alpha = 1 - self._confi_lvl 
         df = self.n - self.d - 1 
         t = stats.t.ppf(1 - alpha/2, df)
-        confidence_beta ={}
-
+        confidence_beta = {"Intervals" : ["Predictor value", "Upper", "Lower"]}
+# 
         for param in range(len(self.coefficients)):
             se_b = np.sqrt(self.variance() * self.cii()[param, param])
             confidence = (self.coefficients[param, 0], t * se_b)
             
             if param == 0:
-                confidence_beta[f"The Intercept, Beta-0"] = [f"{confidence[0]:.4f} +- {confidence[1]:.4f}"]
+                confidence_beta["Intercept, Beta-0"] = [confidence[0], confidence[0] + confidence[1], confidence[0] - confidence[1]]
             
             else:
-                confidence_beta[f"The Parametar {self.data.columns[param - 1]}, Beta-{param}"] = [f"{confidence[0]:.4f} +- {confidence[1]:.4f}"]
+                confidence_beta[f"{self.data.columns[param - 1]}, Beta-{param}"] = [confidence[0], confidence[0] + confidence[1], confidence[0] - confidence[1]]
 
         return confidence_beta
         
