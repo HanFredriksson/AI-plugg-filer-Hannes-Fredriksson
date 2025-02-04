@@ -172,7 +172,7 @@ class LinearRegression:
 
         returns: int
         """
-        SSR = self.RSS() - self.Syy()
+        SSR = self.Syy() - self.RSS()
 
         return SSR
 
@@ -240,7 +240,7 @@ class LinearRegression:
         return R2
     
 
-    def Significance_individual_variables (self, beta):
+    def Significance_individual_variables (self):
         """
         arg: int - For beta-0 (0) to beta-n (n)
 
@@ -248,11 +248,16 @@ class LinearRegression:
 
         returns: int - For significance for an induvidul variables.
         """
+        b_significance = {}
         
-        param_statistic = self.coefficients[beta] / (self.sigma() * np.sqrt(self.cii()[beta, beta]))
-        p_beta= 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))
+        for beta in range(self.d + 1):
+            param_statistic = self.coefficients[beta] / (self.sigma() * np.sqrt(self.cii()[beta, beta]))
+            p_beta= 2*min(stats.t.cdf(param_statistic, self.n - self.d - 1), stats.t.sf(param_statistic, self.n - self.d - 1))
+
+            b_significance[f"Beta-{beta}"] = p_beta
         
-        return p_beta
+        return b_significance
+
     
 
     def p_value_pairs_param (self):
@@ -265,7 +270,9 @@ class LinearRegression:
         """
         p_value_pairs = {"Params":[]}
         original_X = self.X
+        original_Y = self.Y
         original_d = self.d
+
 
         for param in self.data.columns:
             self.params = [param]
@@ -279,7 +286,10 @@ class LinearRegression:
             p_value_pairs["Params"].append(param)
             
         self.X = original_X
+        self.Y = original_Y
         self.d = original_d
+
+
 
         return p_value_pairs
     
@@ -294,17 +304,17 @@ class LinearRegression:
         alpha = 1 - self._confi_lvl 
         df = self.n - self.d - 1 
         t = stats.t.ppf(1 - alpha/2, df)
-        confidence_beta = {"Intervals" : ["Predictor value", "Upper", "Lower"]}
+        confidence_beta = {"Intervals" : ["Parameters value", "Error Margen", "Upper", "Lower"]}
 # 
         for param in range(len(self.coefficients)):
             se_b = np.sqrt(self.variance() * self.cii()[param, param])
             confidence = (self.coefficients[param, 0], t * se_b)
             
             if param == 0:
-                confidence_beta["Intercept, Beta-0"] = [confidence[0], confidence[0] + confidence[1], confidence[0] - confidence[1]]
+                confidence_beta["Beta-0"] = [confidence[0], confidence[1], confidence[0] + confidence[1], confidence[0] - confidence[1]]
             
             else:
-                confidence_beta[f"{self.data.columns[param - 1]}, Beta-{param}"] = [confidence[0], confidence[0] + confidence[1], confidence[0] - confidence[1]]
+                confidence_beta[f"Beta-{param}"] = [confidence[0], confidence[1], confidence[0] + confidence[1], confidence[0] - confidence[1]]
 
         return confidence_beta
         
