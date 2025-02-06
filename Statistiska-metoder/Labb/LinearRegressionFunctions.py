@@ -1,33 +1,18 @@
 import numpy as np
 import scipy.stats as stats
 
-"""
-A function or method to calculate the variance.
-• A function or method to calculate the standard deviation.
-• A function or method that reports the significance of the regression.
-• A function or method that reports the relevance of the regression (R2).
-- Make this on return of a dict to make an pandas dataframe
-
-• Significance tests on individual variables, in particular categorical variables.
-• A function or method that calculates the Pearson number between all pairs of parameters.
-• Confidence intervals on individual parameters.
-- Make an return of a dict for each of these to make an pandas dataframe.
-
-Testing, do check with testing adv data with this class.
-Overkill, try to make it so you can make predictions, if there is time for it.
-So a function you can give X values to run againt the regression. See if you can make it
-so it also gives the probality and the error for the predicted variable 
-
-
-To do
-----------------
-
-gå genom vad som behövs för VG
-"""
-
 
 class LinearRegression:
     def __init__(self, data):
+        """
+        args: Pandas Dataframe
+
+        Class to make a linear regressions model.
+        Functions to test models: The variance, Standard deviation, Significance of the regression, 
+        Relevance of the regression.
+
+        Also test individual variables: Significance, Pearson number, Confidence intervals.
+        """
 
         self.data = data
         self.X = None
