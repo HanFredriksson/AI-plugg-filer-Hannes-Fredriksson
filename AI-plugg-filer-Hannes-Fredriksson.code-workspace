@@ -1,18 +1,13 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"name": "Projekt-OS",
-			"path": "../Projekt-OS"
-		},
-		{
-			"name": "Klimat",
-			"path": "../../Klimat"
-		}
-	],
-	"settings": {
-		"git.autofetch": true
-	}
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "git.autofetch": true,
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.defaultProfile.windows": "PowerShell",
+        "python.envFile": "${workspaceFolder}/.env"
+    }
 }
