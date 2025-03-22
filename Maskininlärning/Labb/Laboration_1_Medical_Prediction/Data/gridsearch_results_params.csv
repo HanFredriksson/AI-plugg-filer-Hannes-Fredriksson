@@ -1,0 +1,17 @@
+Model,Dataset,Scaler,Best Params,Recall,F1 Score
+SVM,Dataset_1,Stdz,"C: 1, degree: 3, gamma: scale, kernel: rbf",0.5993824778077962,0.6565208201225956
+SVM,Dataset_2,Stdz,"C: 1, degree: 3, gamma: scale, kernel: rbf",0.6687163720215219,0.7076766649720386
+SVM,Dataset_1,Norm,"C: 10, degree: 3, gamma: scale, kernel: rbf",0.5943651099961405,0.6519898391193903
+SVM,Dataset_2,Norm,"C: 1, degree: 3, gamma: scale, kernel: rbf",0.6523827824750192,0.7005777961205117
+Logistic Regression,Dataset_1,Stdz,"C: 0.1, l1_ratio: 0.5, max_iter: 200, penalty: elasticnet, solver: saga",0.6171362408336549,0.6634854771784232
+Logistic Regression,Dataset_2,Stdz,"C: 10, l1_ratio: 0.1, max_iter: 500, penalty: elasticnet, solver: saga",0.6641045349730976,0.700516874429918
+Logistic Regression,Dataset_1,Norm,"C: 1, l1_ratio: 0.5, max_iter: 200, penalty: elasticnet, solver: saga",0.6171362408336549,0.663623158331604
+Logistic Regression,Dataset_2,Norm,"C: 0.1, l1_ratio: 0.9, max_iter: 1000, penalty: elasticnet, solver: saga",0.6631437355880092,0.7000710011157318
+Decision Tree,Dataset_1,Stdz,"criterion: entropy, max_depth: 10, max_features: sqrt, min_samples_split: 2",0.6217676572751833,0.6597727040032764
+Decision Tree,Dataset_2,Stdz,"criterion: gini, max_depth: 5, max_features: sqrt, min_samples_split: 2",0.6029976940814757,0.6713017435019788
+Decision Tree,Dataset_1,Norm,"criterion: gini, max_depth: 10, max_features: sqrt, min_samples_split: 10",0.5723658818988807,0.6343706555448615
+Decision Tree,Dataset_2,Norm,"criterion: entropy, max_depth: 5, max_features: sqrt, min_samples_split: 10",0.6402767102229054,0.6866563626996394
+Random Forest,Dataset_1,Stdz,"bootstrap: True, max_depth: 10, max_features: sqrt, n_estimators: 100",0.6219606329602471,0.6634417455743105
+Random Forest,Dataset_2,Stdz,"bootstrap: False, max_depth: 10, max_features: sqrt, n_estimators: 200",0.6742890084550346,0.7090321277025662
+Random Forest,Dataset_1,Norm,"bootstrap: True, max_depth: 10, max_features: sqrt, n_estimators: 200",0.6238903898108838,0.6643378197883489
+Random Forest,Dataset_2,Norm,"bootstrap: False, max_depth: 10, max_features: sqrt, n_estimators: 200",0.6725595695618755,0.7076425394257986
