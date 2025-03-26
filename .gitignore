@@ -171,3 +171,8 @@ mnist.pkl
 Books.csv
 Users.csv
 Ratings.csv
+genome-scores.csv
+genome-tags.csv
+links.csv
+movies.csv
+tags.csv
