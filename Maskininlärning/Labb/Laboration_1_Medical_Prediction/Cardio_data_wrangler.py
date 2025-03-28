@@ -1,5 +1,6 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -12,14 +13,15 @@ class Cardio_data:
         bmi_max_min - list, A max value and a min value
         blood_pressure - dict, with a list of ap_hi max/min and ap_lo max/min values
         encode_data - Stores the encoded data
-        train_test_val - Stores the encoded data 
         """
 
         self.data = data.copy() # Avoid modifying original data
-        self.encoded_data = None
-        self.train_test_val = None
+        self.encoded_data = []
         self.bmi = bmi_max_min
         self.blood_pressure = pressure_values
+
+        self.bmi_calculator_labels()
+        self.blood_pressure_labels()
 
 
 
@@ -52,13 +54,9 @@ class Cardio_data:
         above 140/90, Stage 2 hypertension.
         """
 
-        self.data = self.data[
-            (self.data["ap_hi"] <= self.blood_pressure["ap_hi"][0]) & 
-            (self.data["ap_hi"] >= self.blood_pressure["ap_hi"][1]) & 
-            (self.data["ap_lo"] <= self.blood_pressure["ap_lo"][0]) & 
-            (self.data["ap_lo"] >= self.blood_pressure["ap_lo"][1])
-        ]
-        
+        self.data = self.data[(self.data["ap_hi"] <= 160) & (self.data["ap_hi"] >= 90)]
+        self.data = self.data[(self.data["ap_lo"] <= 120) & (self.data["ap_lo"] >= 70)]
+        self.data["BPR"] = None
         for i in self.data.index:
             ap_hi, ap_lo = self.data.at[i, "ap_hi"], self.data.at[i, "ap_lo"]
         
@@ -76,36 +74,106 @@ class Cardio_data:
 
 
 
-    def encode_df(self, categorical_columns):
-        """
-        Encodes categorical columns into one-hot encoded columns.
 
-        categorical_columns - List of column names to be one-hot encoded.
-        """
 
-        encoder = OneHotEncoder(sparse=False, handle_unknown="ignore")
-        one_hot_encoded = encoder.fit_transform(self.data[categorical_columns])
-        one_hot_df = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(categorical_columns), index=self.data.index)
-        self.encoded_data = pd.concat([self.data.drop(columns=categorical_columns), one_hot_df], axis=1)
+    def encode_df(self):
+        """
+        Encodes categorical columns into one-hot encoded columns. Can handle multiple encodings
+        to make different datasets.
+
+        categorical_columns - List of lists with column names to be one-hot encoded.
+        """
+        drop_columns = [["ap_hi", "ap_lo", "height", "weight", "BMI"], ["height", "weight", "BMI cat", "BPR"]]
+        categorical_columns = [["BMI cat", "BPR", "gender"], ["gender"]]     
+
+        self.encoded_data = []
+
+        for columns, drop in zip(categorical_columns, drop_columns):
+            data = self.data.drop(drop, axis=1)
+            encoder = OneHotEncoder(sparse_output=False)
+            one_hot_encoded = encoder.fit_transform(data[columns])
+            one_hot_df = pd.DataFrame(one_hot_encoded, columns=encoder.get_feature_names_out(columns), index=self.data.index)
+            data = data.drop(columns, axis=1)
+            encoded_data = pd.concat([data, one_hot_df], axis=1)
+            self.encoded_data.append(encoded_data)
+        
+        return self.encoded_data
 
     
-    def data_spliter(self, val=True):
+
+    def eda_plot(self):
         """
-        Splits the data into training, validation, and test sets.
-
-        If val=True, it splits into three sets. Else, it only splits into train and test.
+        EDA plots asked from the assignment
         """
+        fig, axes = plt.subplots(3, 3, dpi=100, figsize=(15, 15))
 
-        X = self.encoded_data.drop("cardio", axis=1)
-        y = self.encoded_data["cardio"]
+        sns.countplot(data=self.data, x="cardio", ax=axes[0, 0])
+        axes[0, 0].set_xlabel("0: Negative, 1: Positive")
+        axes[0, 0].set_ylabel("Number of people")
+        axes[0, 0].set_title("Number of people with/without cardiovascular disease")
+
+        axes[0, 1].pie(
+            self.data["cholesterol"].value_counts(), labels=["1", "2", "3"], autopct="%.0f%%"
+        )
+        axes[0, 1].set_title("The proportion of cholesterol levels")
+        axes[0, 1].legend(["1: Normal", "2: Above normal", "3: Well above normal"])
+
+        sns.histplot(self.data["age"], ax=axes[0, 2], bins=20, color="blue", alpha=0.7, edgecolor="black")
+        axes[0, 2].set_xlabel("Age in days")
+        axes[0, 2].set_ylabel("Number of Positive")
+        axes[0, 2].set_title("Ages with cardiovascular disease (Age in days)")
+
+        sns.countplot(data=self.data, x="smoke", ax=axes[1, 0])
+        axes[1, 0].set_xlabel("0: Non-smoker, 1: Smoker")
+        axes[1, 0].set_ylabel("Number of people")
+        axes[1, 0].set_title("Number of smokers and non-smokers")
+
+        sns.histplot(self.data["weight"], kde=True, ax=axes[1, 1])
+        axes[1, 1].set_xlabel("Weight")
+        axes[1, 1].set_ylabel("Number of people")
+        axes[1, 1].set_title("Weight distribution")
+
+        sns.histplot(self.data["height"], kde=True, ax=axes[1, 2])
+        axes[1, 2].set_xlabel("Height")
+        axes[1, 2].set_ylabel("Number of people")
+        axes[1, 2].set_title("Height distribution")
+
+        sns.countplot(data=self.data[self.data["cardio"] == 1], x="gender", ax=axes[2, 0])
+        axes[2, 0].set_xlabel("1 - Women, 2 - Men")
+        axes[2, 0].set_ylabel("Number of Positive Cases")
+        axes[2, 0].set_title("Cardiovascular disease cases by gender")
+
+        plt.tight_layout()
+
         
-        X_train, X_other, y_train, y_other = train_test_split(X, y, test_size=0.33, random_state=42)
-        
-        if val:
-            X_val, X_test, y_val, y_test = train_test_split(X_other, y_other, test_size=0.5, random_state=42)
-            self.train_test_val = [X_train, X_val, X_test, y_train, y_val, y_test]
-        else:
-            X_test, y_test = X_other, y_other
-            self.train_test_val = [X_train, X_test, y_train, y_test]
+        fig.delaxes(axes[2, 1])
+        fig.delaxes(axes[2, 2])
+
+        return plt.show()
+    
+
+    def plot_number_diseases(self):
+        """
+        Looking at cardiovascular possetiv and against some other features
+        """
+        cardio_positive = self.data[self.data["cardio"] == 1]
+        features = ["BMI cat", "BPR", "active", "alco", "gender", "smoke"]
+        labels = ["BMI category", "Blood Pressure Range", "Physical activity: Yes = 1, No = 0", 
+                "Alcohol drinker: Yes = 1, No = 0", "Gender: 1 - Women, 2 - Men", "Smoker: Yes = 1, No = 0"] 
+
+        fig, axes = plt.subplots(2, 3, figsize=(20, 8), dpi=100)
 
 
+        for i, ax in enumerate(axes.flatten()):
+            sns.countplot(cardio_positive, x=features[i], ax=ax)
+            ax.set(xlabel=labels[i], ylabel="Postive cardio disease count")
+        plt.tight_layout()
+
+        return plt.show()
+    
+    def plot_heatmap(self):
+        """
+        Heatmap
+        """
+        plt.figure(figsize=(15,8))
+        sns.heatmap(self.data.corr(numeric_only=True), vmin=-1, vmax=1, annot=True)
