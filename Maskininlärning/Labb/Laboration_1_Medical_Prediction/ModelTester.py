@@ -45,10 +45,10 @@ class ModelTester:
         self.path = save_result_path
         self.scoring_metrics = scoring
         self.models = {
-            
+            "SVM": SVC,
             "Logistic Regression": LogisticRegression,
             "Decision Tree": DecisionTreeClassifier,
-
+            "Random Forest": RandomForestClassifier
             }
 
 
@@ -149,7 +149,7 @@ class ModelTester:
             self.hyperparams_result_df["Hyperparams"] = self.hyperparams_result_df["Hyperparams"].apply(json.loads)
             print("Loaded results from file.")
 
-        else: 
+        if results is not None: 
             self.hyperparams_result_df = pd.concat([self.hyperparams_result_df, results], ignore_index=True)
             self.hyperparams_result_df.sort_values(by=[sorting_keys[self.scoring_metrics[0]]], ascending=False, inplace=True)
             self.hyperparams_result_df.reset_index(drop= True, inplace=True)
