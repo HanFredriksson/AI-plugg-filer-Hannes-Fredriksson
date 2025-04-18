@@ -40,6 +40,7 @@ import os
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler
+from scipy import sparse
 
 class MovieData():
     
@@ -47,15 +48,30 @@ class MovieData():
         self.movie_profiles = None
         self.tfidf_matrix = None
 
-        self.make_movie_profiles()
-    
+        self.data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Data"))
+        self.movie_profiles_path = os.path.join(self.data_path, "movie_profiles.csv")
+        self.tfidf_matrix_path = os.path.join(self.data_path, "tfidf_matrix.npz")
+
+        if os.path.exists(self.movie_profiles_path) and os.path.exists(self.tfidf_matrix_path):
+            self.load_profiles()
+
+        
+        else:
+            self.make_movie_profiles()
+            self.save_profiles()
+
+    def save_profiles(self):
+        self.movie_profiles.to_csv(self.movie_profiles_path, index=False)
+        sparse.save_npz(self.tfidf_matrix_path, self.tfidf_matrix)
+
+    def load_profiles(self):
+        self.movie_profiles = pd.read_csv(self.movie_profiles_path)
+        self.tfidf_matrix = sparse.load_npz(self.tfidf_matrix_path)
 
     def make_movie_profiles(self):
-        general_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..", "Data")) # Taget från stackoverflow (https://stackoverflow.com/questions/9856683/using-pythons-os-path-how-do-i-go-up-one-directory)
-
-        movies_data = pd.read_csv(general_path + "\\movies.csv")
-        ratings_data = pd.read_csv(general_path + "\\ratings.csv")
-        tags_data = pd.read_csv(general_path + "\\tags.csv")
+        movies_data = pd.read_csv(os.path.join(self.data_path, "movies.csv"))
+        ratings_data = pd.read_csv(os.path.join(self.data_path, "ratings.csv"))
+        tags_data = pd.read_csv(os.path.join(self.data_path, "tags.csv"))
 
         movies_data.insert(2, "year",  movies_data["title"].str.extract(r"\((\d{4})\)"))
         movies_data["title"] = movies_data["title"].str.replace(r"\s*\(\d{4}\)", "", regex=True)  
