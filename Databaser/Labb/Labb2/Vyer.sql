@@ -19,7 +19,7 @@ LEFT JOIN LagerSaldo
 GROUP BY F.Förnamn + ' ' + F.Efternamn, F.Födelsedatum, F.Dödsdatum;
 
 
-CREATE VIEW kund_försäljning AS
+CREATE VIEW Övriga_tabeller AS
 SELECT 
     k.ID,
     k.Förnamn + ' ' + k.Efternamn AS Namn,

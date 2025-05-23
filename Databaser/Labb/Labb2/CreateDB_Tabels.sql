@@ -27,7 +27,7 @@ GO
 
 CREATE TABLE Butiker (
     ID INT PRIMARY KEY IDENTITY,
-    Namn NVARCHAR(50),
+    ButikNamn NVARCHAR(50),
     [Address] CHAR(100)
 );
 

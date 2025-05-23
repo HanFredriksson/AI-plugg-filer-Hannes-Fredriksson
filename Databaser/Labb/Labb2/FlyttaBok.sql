@@ -46,3 +46,47 @@ BEGIN
     END
 END;
 
+
+SELECT 
+    ISBN
+FROM 
+    Böcker
+WHERE 
+    Böcker.Titel LIKE '%Predikanten%' 
+
+SELECT
+    Titel,
+    Antal,
+    Butiker.ButikNamn
+
+FROM 
+    Böcker
+JOIN 
+    LagerSaldo 
+    ON LagerSaldo.ISBN = Böcker.ISBN
+JOIN 
+    Butiker 
+    ON Butiker.ID = LagerSaldo.ButikID
+WHERE 
+    Böcker.ISBN = '9780450417382'
+
+SELECT * FROM Böcker WHERE ISBN = 9789137132133;
+
+SELECT * FROM LagerSaldo WHERE ISBN = 9789137132133;
+
+SELECT 
+    Böcker.Titel,
+    LagerSaldo.Antal,
+    Butiker.ButikNamn
+FROM 
+    Böcker
+JOIN 
+    LagerSaldo ON LagerSaldo.ISBN = Böcker.ISBN
+JOIN 
+    Butiker ON Butiker.ID = LagerSaldo.ButikID
+WHERE 
+    Böcker.ISBN = '9789137132133';
+
+
+-- Hitta böcker och ge all info om boken, författare, gener, pris, utgivnings år, 
+-- Hur många som finns i butik
