@@ -3,12 +3,12 @@ INSERT INTO Författare (
     Efternamn,
     Födelsedatum
 )
-
-VALUES('Astrid', 'Lindgren', 1907),
-('J.K.', 'Rowling', 1965),
-('George', 'Orwell', 1903),
-('Camilla', 'Läckberg', 1974),
-('Stephen', 'King', 1947);
+VALUES
+('Astrid', 'Lindgren', '1907-11-14', '2002-01-28'),
+('J.K.', 'Rowling', '1965-07-31', NULL),
+('George', 'Orwell', '1903-06-25', '1950-01-21'),
+('Camilla', 'Läckberg', '1974-08-30', NULL),
+('Stephen', 'King', '1947-09-21', NULL);
 
 GO
 

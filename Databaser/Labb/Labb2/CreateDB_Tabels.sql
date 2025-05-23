@@ -6,7 +6,8 @@ CREATE TABLE Författare (
     ID INT PRIMARY KEY IDENTITY,
     Förnamn NVARCHAR(50), 
     Efternamn NVARCHAR(50),
-    Födelsedatum INT
+    Födelsedatum DATE,
+    Dödsdatum DATE
 );
 
 GO
@@ -52,6 +53,7 @@ CREATE TABLE LagerSaldo (
     CONSTRAINT FK_LagerSaldo_Butik FOREIGN KEY (ButikID) REFERENCES Butiker(ID),
     CONSTRAINT FK_LagerSaldo_Bok FOREIGN KEY (ISBN) REFERENCES Böcker(ISBN)
 );
+
 GO
 
 CREATE TABLE Ordrar (
@@ -66,3 +68,5 @@ CREATE TABLE Ordrar (
     CONSTRAINT FK_Ordrar_ISBN FOREIGN KEY (ISBN) REFERENCES Böcker(ISBN),
     CONSTRAINT FK_Ordrar_ButikID FOREIGN KEY (ButikID) REFERENCES Butiker(ID)
 );
+
+GO
