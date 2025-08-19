@@ -1,0 +1,7 @@
+
+matplotlib
+plotly_express
+pandas
+numpy
+dash
+sklearn
