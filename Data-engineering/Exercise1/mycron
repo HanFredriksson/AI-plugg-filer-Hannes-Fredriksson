@@ -1,0 +1,2 @@
+# Kör countdown.py varje minut
+* * * * * python /Exercise1/src/countdown.py >> /Exercise1/logs/cron.log 2>&1
