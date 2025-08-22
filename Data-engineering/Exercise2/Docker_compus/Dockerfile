@@ -1,11 +1,18 @@
-FROM python:3.11
+# Use Python 3.11 base image
+FROM python:3.11-slim
 
+# Set working directory inside the container
 WORKDIR /app
 
-RUN mkdir -p /app/data
+# Create folders for persistent data
+RUN mkdir -p /app/data /app/src /app/data/generations
 
-COPY . .
+# Copy requirements if you have any
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8050
+# Copy source code
+COPY src/ ./src
 
-CMD ["python", "./src/main.py"]
+# Default command to run your scraper
+CMD ["python", "./src/pokemon_scraper.py"]

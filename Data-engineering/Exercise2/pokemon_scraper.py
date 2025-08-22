@@ -1,5 +1,9 @@
 import pandas as pd
+import os
 
+# Ensure folders exist
+os.makedirs("data", exist_ok=True)
+os.makedirs("data/generations", exist_ok=True)
 
 tabel_names = pd.read_html("https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_Pok%C3%A9mon")
 tabel_gen = pd.read_html("https://en.wikipedia.org/wiki/List_of_Pok%C3%A9mon")
@@ -46,4 +50,4 @@ long_df = long_df[~mask]
 for gen in range(1, long_df["Gen"].max()+1):
     mask = long_df["Gen"].astype(str).str.contains(str(gen))
     tmp = long_df[mask]
-    tmp.to_csv(f"data/Generation {gen}", index=False)
+    tmp.to_csv(f"data/generations/Generation {gen}", index=False)
