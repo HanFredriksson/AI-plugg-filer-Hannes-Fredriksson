@@ -7,7 +7,7 @@ tabel_gen = pd.read_html("https://en.wikipedia.org/wiki/List_of_Pok%C3%A9mon")
 
 poke__name_tabel = tabel_names[1]
 poke__name_tabel.drop(columns="Japanskt namn", inplace=True)
-poke__name_tabel.to_csv(f"data/Poke-list", index=False)
+poke__name_tabel.to_csv(f"data/Poke-list.csv", index=False)
 
 poke_gen_tabel = tabel_gen[2]
 poke_gen_tabel.columns = poke_gen_tabel.columns.droplevel(0)
@@ -16,7 +16,7 @@ poke_gen_tabel["Gen"] = None
 generation = 1
 
 for i in range(len(poke_gen_tabel)):
-    dex = poke_gen_tabel.loc[i, ('Dex #')]
+    dex = poke_gen_tabel.loc[i, "Dex #"]
     
     if "Gen" in str(dex):
         generation += 1
@@ -46,4 +46,6 @@ long_df = long_df[~mask]
 for gen in range(1, long_df["Gen"].max()+1):
     mask = long_df["Gen"].astype(str).str.contains(str(gen))
     tmp = long_df[mask]
-    tmp.to_csv(f"data/Generation {gen}", index=False)
+    tmp.to_csv(f"data/Generation {gen}.csv", index=False)
+
+print("Scraper ran and file saved")
