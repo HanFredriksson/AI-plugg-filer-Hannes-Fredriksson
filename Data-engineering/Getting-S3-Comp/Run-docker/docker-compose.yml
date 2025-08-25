@@ -1,0 +1,23 @@
+
+services:
+  minio:
+    image: bitnami/minio:latest
+    container_name: minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - minionetwork
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio12345
+      - MINIO_USERS=save.load:save.load89
+      - MINIO_USER_POLICIES=save.load=readwrite
+      - MINIO_DEFAULT_BUCKETS=data.lake
+    volumes:
+      - ~/minio/data:/data
+    command: server /data --console-address ":9001"
+
+networks:
+  minionetwork:
+    driver: bridge
