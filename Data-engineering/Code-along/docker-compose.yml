@@ -1,0 +1,17 @@
+
+services:
+  ollama:
+    image: docker.io/ollama/ollama
+    container_name: ollama
+    ports:
+      - "7869:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    tty: true
+    restart: always
+    pull_policy: always
+
+volumes:
+  ollama_data:
